@@ -1,0 +1,63 @@
+String sql_createDatasetPorOperador = " select  \n"
+                                        + " sum(cabecalhovendas.totalvenda) as totalvenda,\n"
+                                        + " cabecalhovendas.operador,\n"
+                                        + " count(id_vendedor) as quantidade_de_vendas,\n"
+                                        + " ( select count(id_vendedor) from cabecalhovendas inner join vendedor on cabecalhovendas.id_vendedor=vendedor.codigo ) as somatotal,\n"
+                                        + " ( count(id_vendedor) ) * ( 100 ) / ( select count(id_vendedor) from cabecalhovendas inner join vendedor on cabecalhovendas.id_vendedor=vendedor.codigo ) as percentual\n"
+                                        + "   from cabecalhovendas inner join vendedor on cabecalhovendas.id_vendedor=vendedor.codigo  where cabecalhovendas.datavenda ='" + mglobais.ConverterData_AMD(mglobais.MostraData()) + "'\n"
+                                        + "   group by  cabecalhovendas.operador order by quantidade_de_vendas desc";
+
+String sql_createDataset_VendaPorVendedor = " select  \n"
+                                        + " sum(cabecalhovendas.totalvenda) as totalvenda,\n"
+                                        + " vendedor.codigo as codigo,\n"
+                                        + " vendedor.nome as nome,\n"
+                                        + " count(id_vendedor) as quantidade_de_vendas,\n"
+                                        + " ( select count(id_vendedor) from cabecalhovendas inner join vendedor on cabecalhovendas.id_vendedor=vendedor.codigo ) as somatotal,\n"
+                                        + " ( count(id_vendedor) ) * ( 100 ) / ( select count(id_vendedor) from cabecalhovendas inner join vendedor on cabecalhovendas.id_vendedor=vendedor.codigo ) as percentual\n"
+                                        + "   from cabecalhovendas inner join vendedor on cabecalhovendas.id_vendedor=vendedor.codigo  where cabecalhovendas.datavenda ='" + mglobais.ConverterData_AMD(mglobais.MostraData()) + "'\n"
+                                        + "   group by id_vendedor order by quantidade_de_vendas desc";
+
+sql_createDatasetProdutoMaisVendido = "select\n"
+                                            + " itensvenda.id_item as id_item,\n"
+                                            + "  itensvenda.nome as nome,\n"
+                                            + "   sum(itensvenda.quantidade) as quantidadevenda ,\n"
+                                            + "   sum(itensvenda.acrescimo) as acrescimo,\n"
+                                            + "   sum(valortotal) as valortotal,\n"
+                                            + "   sum(itensvenda.desconto) as  desconto,\n"
+                                            + "   ( sum(valortotal) ) + ( sum(itensvenda.acrescimo) ) - ( sum(itensvenda.desconto) ) as subtotal\n"
+                                            + " from itensvenda\n"
+                                            + "inner join produto on produto.codigo = itensvenda.id_item \n"
+                                            + "where   EXTRACT(YEAR_MONTH from itensvenda.datavenda) in(" + CB_ano.getSelectedItem() + "07," + CB_ano.getSelectedItem() + "08, " + CB_ano.getSelectedItem() + "09, " + CB_ano.getSelectedItem() + "10, " + CB_ano.getSelectedItem() + "11, " + CB_ano.getSelectedItem() + "12)" + " \n"
+                                            + "group by id_item\n"
+                                            + "  order by quantidadevenda  desc limit 5";
+
+sql_createDataset__Cliente_que_mais_Comprou = "select\n"
+                                            + " cabecalhovendas.id_cliente as id_cliente,\n"
+                                            + " cliente.nome as nome,\n"
+                                            + " count(cabecalhovendas.id_cliente) as qtde_compra\n"
+                                            + " \n"
+                                            + "  from cabecalhovendas inner join cliente on cabecalhovendas.id_cliente=cliente.codigo\n"
+                                            + "   where cabecalhovendas.id_cliente > 1 and cabecalhovendas.datavenda ='" + mglobais.ConverterData_AMD(mglobais.MostraData()) + " \n"
+                                            + "     group by cabecalhovendas.id_cliente\n"
+                                            + "   ORDER BY cabecalhovendas.id_cliente DESC LIMIT 10";
+
+String sql_createDatasetFormadePagamento = "select \n"
+                                        + "tipo.nome,\n"
+                                        + "( sum(modalidadedevenda.valorpago) ) - ( sum(modalidadedevenda.troco) ) as valor_total_pagamento,\n"
+                                        + "(select ( sum(modalidadedevenda.valorpago) ) - ( sum(modalidadedevenda.troco) )  from cabecalhovendas \n"
+                                        + "inner join modalidadedevenda on cabecalhovendas.codigo=modalidadedevenda.codigovenda) as valor_de_todos_pgto,\n"
+                                        + "( ( sum(modalidadedevenda.valorpago) ) - ( sum(modalidadedevenda.troco) ) ) * ( 100 ) / (select ( sum(modalidadedevenda.valorpago) ) - ( sum(modalidadedevenda.troco) )  from cabecalhovendas \n"
+                                        + "inner join modalidadedevenda on cabecalhovendas.codigo=modalidadedevenda.codigovenda) as porcentagem\n"
+                                        + " from cabecalhovendas \n"
+                                        + "inner join modalidadedevenda on cabecalhovendas.codigo=modalidadedevenda.codigovenda\n"
+                                        + "inner join tipo              on tipo.codigo=modalidadedevenda.tipovenda\n"
+                                        + " where  modalidadedevenda.data ='" + mglobais.ConverterData_AMD(mglobais.MostraData()) + "'  \n"
+                                        + "group by tipo.nome";
+
+String sql_createDataset_Horario_De_Pico = "select\n"
+                                        + "HOUR(hora)  ,\n"
+                                        + " count(*) as quantidade_de_vendas,\n"
+                                        + " ( select count(id_vendedor) from cabecalhovendas ) as somatotal,\n"
+                                        + " ( count(id_vendedor) ) * ( 100 ) / ( select count(id_vendedor) from cabecalhovendas ) as percentual\n"
+                                        + " from  cabecalhovendas  where cabecalhovendas.datavenda ='" + mglobais.ConverterData_AMD(mglobais.MostraData()) + "'\n"
+                                        + "  group by   HOUR(hora)  ";
